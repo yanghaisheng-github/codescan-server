@@ -18,8 +18,8 @@ var loginFailed = {
 /* GET users listing. */
 router.post('/', function(req, res, next) {
   //mysqldao.queryAll();
-  mysqldao.verifyUser(req.body.username, req.body.password, function(varifyResult){
-    if(varifyResult)
+  mysqldao.verifyUser(req.body.username, req.body.password, function(verifyResult){
+    if(verifyResult.status)
     {
       console.log('用户验证成功')
       // 验证成功
@@ -27,7 +27,8 @@ router.post('/', function(req, res, next) {
       let token = jwt.sign(content, secretkey, {
         expiresIn: 60*60*1       //1h过期
       });
-      loginSuccess[token] = token;
+      loginSuccess.token = token;
+      loginSuccess.role = verifyResult.role,
       res.send(JSON.stringify(loginSuccess));
     }else{
       // 验证失败
@@ -40,7 +41,9 @@ router.post('/', function(req, res, next) {
 
 //读取tb_users所有信息
 router.get('/', function(req, res, next){
-  mysqldao.selectUsersData(function(result){
+  var sql = "select username,department,usertype,authority from tb_users";
+  var sql_params = [];
+  mysqldao.selectData(sql, sql_params,function(result){
     res.send(result);
   });
 });

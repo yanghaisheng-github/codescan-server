@@ -19,11 +19,10 @@ module.exports = {
             conn.release();
         });
     },
-    //读取用户表tb_users
-    selectUsersData: function (callback) {
-        var sql = "select username,department,usertype,authority from tb_users";
+    //读表
+    selectData: function (select_sql, select_sql_params, callback) {
         connPool.getConnection(function (err, conn) {
-            conn.query(sql, function (err, rows) {
+            conn.query(select_sql, select_sql_params, function (err, rows) {
                 if (err) throw err;
                 console.log(rows);
                 callback(rows);
@@ -42,12 +41,12 @@ module.exports = {
                 if (err) throw err;
                 if (rows[0] != undefined) {
                     if (rows[0].password == password) {
-                        callback(true);
+                        callback({'status': true, 'role': rows[0].authority});
                     } else {
-                        callback(false);
+                        callback({'status': false});
                     }
                 } else {
-                    callback(false);
+                    callback({'status': false});
                 }
             });
             conn.release();
@@ -327,8 +326,8 @@ module.exports = {
             + " values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         var add_tb_sca_system_sql_params = [data.SystemName, data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark];
 
-        var add_tb_sca_record_sql = "insert into tb_sca_record(system_name, maintenance, code_checker, architect, language) values(?, ?, ?, ?, ?)";
-        var add_tb_sca_record_sql_params = [data.SystemName, data.Maintenance, data.CodeChecker, data.Architect, data.Language];
+        var add_tb_sca_record_sql = "insert into tb_sca_record(system_name) values(?)";
+        var add_tb_sca_record_sql_params = [data.SystemName];
         console.log("-------开始执行事务--------")
         connPool.getConnection(function (err, conn) {
             conn.beginTransaction(function (err) {
@@ -395,11 +394,12 @@ module.exports = {
         var currTime = custom.getCurrentTime();
         console.log(currTime);
 
-        var edit_sql = "update tb_sca_system set department = ?, security_level = ?, maintenance = ?, code_checker = ?, architect = ?, language = ?, edit_time = ?, remark = ? where system_name = ? ";
-        var edit_sql_params = [data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark, data.SystemName];
+        var edit_tb_sca_system_sql = "update tb_sca_system set department = ?, security_level = ?, maintenance = ?, code_checker = ?, architect = ?, language = ?, edit_time = ?, remark = ? where system_name = ? ";
+        var edit_tb_sca_system_sql_params = [data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark, data.SystemName];
+
         connPool.getConnection(function (err, conn) {
             if (err) throw err;
-            conn.query(edit_sql, edit_sql_params, function (errI, rows) {
+            conn.query(edit_tb_sca_system_sql, edit_tb_sca_system_sql_params, function (errI, rows) {
                 if (errI) throw errI;
                 callback(currTime);
                 console.log("----更新数据成功-----");
@@ -445,7 +445,8 @@ module.exports = {
     //java代码扫描页面初始化,根据用户名显示对应的数据
     select_Java_Scan_Data: function (username, callback) {
         console.log("username:" + username);
-        var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where (maintenance = ? or code_checker = ? or architect = ?) and language = 'java'";
+        //var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where (maintenance = ? or code_checker = ? or architect = ?) and language = 'java'";
+        var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = 'java')";
         var sql_params = [username, username, username];
         connPool.getConnection(function (err, conn) {
             conn.query(sql, sql_params, function (err, rows) {
