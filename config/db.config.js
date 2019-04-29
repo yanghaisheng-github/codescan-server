@@ -2,7 +2,7 @@ module.exports = {
     mysql:{
         connectionLimit: 20, //连接数量,默认为10
         connectTimeout: 2000, //单位毫秒
-        host: '192.168.1.10',
+        host: '192.168.43.231',
         user: 'root',
         password: '123123',
         database: 'test',
