@@ -3,11 +3,21 @@ var router = express.Router();
 var mysqldao = require('../api/mysqldao');
 var multer = require('multer');
 const custom = require('../api/custom');
+const fs = require('fs');
+const path = require('path');
 
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, `uploads/java/${req.body.SystemName}/${req.url}`); // 保存的路径，备注：需要自己创建
+    let savePath = `uploads/java/${req.body.SystemName}/${req.url}`;
+    if (!fs.existsSync(savePath)) {
+      custom.mkdirSync(savePath, function () {
+        console.log('目录创建成功');
+        cb(null, savePath); // 保存的路径，备注：需要自己创建
+      });
+    }else{
+      cb(null, savePath); // 保存的路径，备注：需要自己创建
+    }
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);    // 保存的文件名称
@@ -62,26 +72,36 @@ router.post('/table', function (req, res, next) {
   });
 });
 
-//移除单个上传的文件
+//删除源码或者代码分析报告
 router.post('/:delty/delete', function (req, res, next) {
-  console.log('---------------移除单个src上传的文件---------------------');
+  console.log('---------------删除源码或者代码分析报告---------------------');
   console.log(req.body);
   if (req.body.url) {
     let filePath = req.body.url;
     let SystemName = filePath.split('\\')[2];
     let update_sql = '';
     console.log(req.params.delty);
-    if (req.params.delty == 'src')
+    if (req.params.delty == 'src'){
       update_sql = "update tb_sca_record set  scan_src = '', scan_src_name = ''  where system_name = ?";
-    if (req.params.delty == 'analysis')
+      let fileDir = path.join(filePath, "../");
+      custom.removeDir(fileDir).then(function () {
+        console.log(`删除${fileDir}成功`);
+      });
+    }
+    if (req.params.delty == 'analysis'){
       update_sql = "update tb_sca_record set  analysis_report = '', analysis_report_name = ''  where system_name = ?";
+      custom.deleteFile(filePath, function (delRes) {
+          console.log(delRes.msg);
+      });
+    }
+      
     var update_sql_params = [SystemName];
     console.log(update_sql);
     mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
       if (status) {
-        custom.deleteFile(filePath, function (delRes) {
-          res.send(delRes);
-        });
+        res.send({ "status": true, "msg": `存在该文件，已被删除` });
+      }else{
+        res.send({ "status": false, "msg": `删除失败，没找到该文件。可尝试新刷新页面。` });
       }
     });
   } else {

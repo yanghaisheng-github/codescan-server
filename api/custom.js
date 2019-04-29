@@ -82,10 +82,11 @@ function deleteFile(fileUrl, callback) {
 
 //使用7-zip解压缩，所以电脑上需要安装7-zip，并配置环境变量
 //相关命令参考https://www.jianshu.com/p/4f9be6b47161
+//指定目录-o${scanDir} 无空格
 function uncompress(compressedFile) {
     var compressedAbsFile = path.join(__dirname, '../', compressedFile);
-    var scanDir = path.join(compressedAbsFile, "../../", "scanResult");
-    var cmdStr = `7z e ${compressedAbsFile} -o${scanDir}`;
+    var scanDir = path.join(compressedAbsFile, "../");
+    var cmdStr = `7z x ${compressedAbsFile} -o${scanDir} -y`;
     console.log(cmdStr);
     exec(cmdStr, { encoding: 'binary' }, function (err, stdout, stderr) {
         if (err) {
