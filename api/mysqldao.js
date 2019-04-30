@@ -442,12 +442,12 @@ module.exports = {
         }
     },
 
-    //java代码扫描页面初始化,根据用户名显示对应的数据
-    select_Java_Scan_Data: function (username, callback) {
+    //代码扫描页面初始化,根据用户名和语言显示对应的数据
+    select_Scan_Data: function (username, language,callback) {
         console.log("username:" + username);
         //var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where (maintenance = ? or code_checker = ? or architect = ?) and language = 'java'";
-        var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = 'java')";
-        var sql_params = [username, username, username];
+        var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = ?)";
+        var sql_params = [username, username, username, language];
         connPool.getConnection(function (err, conn) {
             conn.query(sql, sql_params, function (err, rows) {
                 if (err) throw err;

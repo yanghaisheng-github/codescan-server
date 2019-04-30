@@ -9,7 +9,9 @@ const path = require('path');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let savePath = `uploads/java/${req.body.SystemName}/${req.url}`;
+    let saveDir = req.url.split('/')[1];
+    console.log(`saveDir: ${saveDir}`);
+    let savePath = `uploads/${req.params.language}/${req.body.SystemName}/${saveDir}`;
     if (!fs.existsSync(savePath)) {
       custom.mkdirSync(savePath, function () {
         console.log('目录创建成功');
@@ -28,7 +30,7 @@ var upload = multer({
 })
 
 //上传源码 并将源码存放路径和开始扫描日期更新到保存到tb_sca_record表
-router.post('/src', upload.single('file'), function (req, res, next) {
+router.post('/src/:language', upload.single('file'), function (req, res, next) {
   //console.log(req);
   console.log(req.body);
   console.log(req.file);
@@ -48,7 +50,7 @@ router.post('/src', upload.single('file'), function (req, res, next) {
 });
 
 //上传excel格式分析报告
-router.post('/analysisReport', upload.single('file'), function (req, res, next) {
+router.post('/analysisReport/:language', upload.single('file'), function (req, res, next) {
   console.log(req.body);
   console.log(req.file);
   //获取当前时间
@@ -65,9 +67,9 @@ router.post('/analysisReport', upload.single('file'), function (req, res, next) 
 });
 
 //获取初始页面数据
-router.post('/table', function (req, res, next) {
+router.post('/table/:language', function (req, res, next) {
   console.log(req.body);
-  mysqldao.select_Java_Scan_Data(req.body.username, function (rows) {
+  mysqldao.select_Scan_Data(req.body.username, req.params.language,function (rows) {
     res.send(rows);
   });
 });
