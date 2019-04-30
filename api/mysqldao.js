@@ -411,21 +411,14 @@ module.exports = {
         console.log(data);
         var delete_sql = "";
         var delete_sql_params = [];
-        if (data.SystemName) {
-            delete_sql = "delete from tb_sca_system where system_name = ? ";
-            delete_sql_params = [data.SystemName];
-            console.log('---1--' + delete_sql + delete_sql_params);
-        }
-        if (data.MultiSystemName.length != 0) {
-            console.log('---data.MultiSystemName--' + data.MultiSystemName);
+        if (data.length != 0) {
             delete_sql = "delete from tb_sca_system where system_name in (";
-            data.MultiSystemName.forEach(function (v, i, a) {
+            data.forEach(function (v, i, a) {
                 delete_sql += "?,";
+                delete_sql_params.push(v.SystemName);
             });
             delete_sql = delete_sql.substr(0, delete_sql.length - 1);
             delete_sql += ")";
-
-            delete_sql_params = data.MultiSystemName;
         }
         console.log(delete_sql);
         console.log(delete_sql_params);
@@ -443,11 +436,19 @@ module.exports = {
     },
 
     //代码扫描页面初始化,根据用户名和语言显示对应的数据
-    select_Scan_Data: function (username, language,callback) {
-        console.log("username:" + username);
-        //var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where (maintenance = ? or code_checker = ? or architect = ?) and language = 'java'";
-        var sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = ?)";
-        var sql_params = [username, username, username, language];
+    select_Scan_Data: function (data, language,callback) {
+        console.log("username:" + data.username);
+        console.log(`role: ${data.role}`);
+        //判断用户是否为管理员，若是管理员，则根据语言显示所有数据
+        var sql = '';
+        var sql_params = '';
+        if(data.role == '管理员'){
+            sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where language = ?)";
+            sql_params = [language];
+        }else{
+            sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = ?)";
+            sql_params = [data.username, data.username, data.username, language];
+        }
         connPool.getConnection(function (err, conn) {
             conn.query(sql, sql_params, function (err, rows) {
                 if (err) throw err;

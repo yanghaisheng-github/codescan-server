@@ -69,7 +69,7 @@ router.post('/analysisReport/:language', upload.single('file'), function (req, r
 //获取初始页面数据
 router.post('/table/:language', function (req, res, next) {
   console.log(req.body);
-  mysqldao.select_Scan_Data(req.body.username, req.params.language,function (rows) {
+  mysqldao.select_Scan_Data(req.body, req.params.language,function (rows) {
     res.send(rows);
   });
 });

@@ -9,7 +9,7 @@ const custom = require('../api/custom');
 //添加数据到系统清单表tb_sca_system
 router.post('/add', function (req, res, next) {
   // 创建uploads/java/${req.body.SystemName}/src、/analysisReport、/scanResult文件夹
-  var srcPath = `uploads/java/${req.body.SystemName}/src`;
+/*   var srcPath = `uploads/java/${req.body.SystemName}/src`;
   var scanResultPath = `uploads/java/${req.body.SystemName}/scanResult`;
   var analysisPath = `uploads/java/${req.body.SystemName}/analysisReport`;
   if (!fs.existsSync(srcPath)) {
@@ -26,7 +26,7 @@ router.post('/add', function (req, res, next) {
     custom.mkdirSync(analysisPath, function () {
       console.log('分析报告目录创建成功')
     });
-  }
+  } */
 
   //console.log(req.body);
   mysqldao.addSystemData(req.body, function (addResult) {
@@ -51,16 +51,19 @@ router.get('/', function (req, res, next) {
 
 //删除系统清单表tb_sca_system某一行
 router.post('/delete', function (req, res, next) {
-  // 删除uploads/java/${req.body.SystemName}文件夹
-  let dirSysName = `uploads/java/${req.body.SystemName}`;
-  if (fs.existsSync(dirSysName)) {
-    custom.removeDir(dirSysName).then(function () {
-      console.log(`删除uploads/java/${req.body.SystemName}成功`);
-    })
-  }
-
   console.log(req.body);
-  mysqldao.deleteSystemData(req.body, function (deleteResult) {
+  let del_list_name = req.body;
+  del_list_name.forEach(element => {
+    // 删除uploads/${req.body.Language}/${req.body.SystemName}文件夹
+    let dirSysName = `uploads/${element.Language}/${element.SystemName}`;
+    if (fs.existsSync(dirSysName)) {
+      custom.removeDir(dirSysName).then(function () {
+        console.log(`删除uploads/${element.Language}/${element.SystemName}成功`);
+      })
+    }
+  });
+
+  mysqldao.deleteSystemData(del_list_name, function (deleteResult) {
     res.send(deleteResult);
   });
 });

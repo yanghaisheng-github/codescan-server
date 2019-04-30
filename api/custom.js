@@ -96,7 +96,6 @@ function uncompress(compressedFile) {
             stdout = iconv.decode(stdout, 'gbk');
             console.log(`解压成功：${stdout}`);
             //开始扫描
-            //
         }
     });
 }
