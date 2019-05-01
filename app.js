@@ -7,7 +7,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var systemlistingRouter = require('./routes/systemlisting');
-var uploadRouter = require('./routes/upload')
+var uploadRouter = require('./routes/upload');
+var mmscRouter = require('./routes/mmsc');
 
 var app = express();
 
@@ -37,6 +38,7 @@ app.use('/systemlisting/table', systemlistingRouter);
 app.use('/users/table', usersRouter);
 
 app.use('/upload', uploadRouter);
+app.use('/mmsc', mmscRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

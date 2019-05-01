@@ -247,7 +247,7 @@ module.exports = {
 
     //通过事务判断数据是否已存在，然后添加数据到系统清单表tb_sca_system，并返回操作时间
     //再次添加维护联系人，代码检测人员、安全架构师用户
-    addSystemData: function (data, returnRes) {
+/*     addSystemData: function (data, returnRes) {
         //获取当前时间
         var currTime = custom.getCurrentTime();
         console.log(currTime);
@@ -255,9 +255,10 @@ module.exports = {
         var select_sql = "select system_name from tb_sca_system where system_name = ?";
         var select_sql_params = [data.SystemName];
 
-        var add_sql = "insert into tb_sca_system(system_name, department, security_level, maintenance, code_checker, architect, language, edit_time, remark)"
+        var add_tb_sca_system_sql = "insert into tb_sca_system(system_name, department, security_level, maintenance, code_checker, architect, language, edit_time, remark)"
             + " values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        var add_sql_params = [data.SystemName, data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark];
+        var add_tb_sca_system_sql_params = [data.SystemName, data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark];
+
         console.log("-------开始执行事务--------")
         connPool.getConnection(function (err, conn) {
             conn.beginTransaction(function (err) {
@@ -280,7 +281,7 @@ module.exports = {
 
             var task2 = function (callback) {
                 console.log('=========开始执行task2==========');
-                conn.query(add_sql, add_sql_params, function (errI, rows) {
+                conn.query(add_tb_sca_system_sql, add_tb_sca_system_sql_params, function (errI, rows) {
                     if (errI) returnRes({ "status": "false", "msg": "数据库插入该系统名称时发生异常" });
                     //console.log(rows);
                     returnRes({ "status": "success", "msg": currTime });
@@ -289,7 +290,28 @@ module.exports = {
                 });
             };
 
-            async.series([task1, task2], function (err, result) {
+            var task3 = function (callback) {
+                console.log('=========开始执行task3==========');
+                conn.query(add_tb_mmsc_Maintenance_sql, add_tb_mmsc_sql_Maintenance_params, function (errI, rows) {
+                    if (errI) returnRes({ "status": "false", "msg": "数据库给Maintenance插入mmsc表时发生异常" });
+                    //console.log(rows);
+                    returnRes({ "status": "success", "msg": currTime });
+                    console.log("----task3执行结果----")
+                    callback(null, rows);
+                });
+            };
+            var task4 = function (callback) {
+                console.log('=========开始执行task4==========');
+                conn.query(add_tb_mmsc_CodeChecker_sql, add_tb_mmsc_sql_CodeChecker_params, function (errI, rows) {
+                    if (errI) returnRes({ "status": "false", "msg": "数据库给CodeChecker插入mmsc表时发生异常" });
+                    //console.log(rows);
+                    returnRes({ "status": "success", "msg": currTime });
+                    console.log("----task4执行结果----")
+                    callback(null, rows);
+                });
+            };
+            
+            async.series([task1, task2, task3, task4], function (err, result) {
                 if (err) {
                     console.log(err);
                     //回滚
@@ -309,7 +331,7 @@ module.exports = {
 
             });
         });
-    },
+    }, */
 
     //通过事务判断系统名称数据是否已存在，然后添加数据到系统清单表tb_sca_system，并返回操作时间
     //然后再添加到表tb_sca_record
@@ -328,6 +350,12 @@ module.exports = {
 
         var add_tb_sca_record_sql = "insert into tb_sca_record(system_name) values(?)";
         var add_tb_sca_record_sql_params = [data.SystemName];
+
+        var add_tb_mmsc_Maintenance_sql = 'insert into tb_mmsc(username, msg, status, time) values(?, ?, "未读", ?)';
+        var add_tb_mmsc_sql_Maintenance_params = [data.Maintenance, `“${data.SystemName}”已被管理员在${currTime}创建，请及时上传源码`, currTime];
+
+        var add_tb_mmsc_CodeChecker_sql = 'insert into tb_mmsc(username, msg, status, time) values(?, ?, "未读", ?)';
+        var add_tb_mmsc_sql_CodeChecker_params = [data.CodeChecker, `“${data.SystemName}”已被管理员在${currTime}创建，请及时上传源码`, currTime];
         console.log("-------开始执行事务--------")
         connPool.getConnection(function (err, conn) {
             conn.beginTransaction(function (err) {
@@ -367,7 +395,26 @@ module.exports = {
                 });
             };
 
-            async.series([task1, task2, task3], function (err, result) {
+            var task4 = function (callback) {
+                console.log('=========开始执行task3==========');
+                conn.query(add_tb_mmsc_Maintenance_sql, add_tb_mmsc_sql_Maintenance_params, function (errI, rows) {
+                    if (errI) returnRes({ "status": "false", "msg": "数据库给Maintenance插入mmsc表时发生异常" });
+                    //console.log(rows);
+                    console.log("----tas4执行结果----")
+                    callback(null, rows);
+                });
+            };
+            var task5 = function (callback) {
+                console.log('=========开始执行task5==========');
+                conn.query(add_tb_mmsc_CodeChecker_sql, add_tb_mmsc_sql_CodeChecker_params, function (errI, rows) {
+                    if (errI) returnRes({ "status": "false", "msg": "数据库给CodeChecker插入mmsc表时发生异常" });
+                    //console.log(rows);
+                    console.log("----task5执行结果----")
+                    callback(null, rows);
+                });
+            };
+
+            async.series([task1, task2, task3, task4, task5], function (err, result) {
                 if (err) {
                     console.log(err);
                     //回滚
