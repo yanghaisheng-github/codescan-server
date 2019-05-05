@@ -17,7 +17,7 @@ var storage = multer.diskStorage({
         console.log('目录创建成功');
         cb(null, savePath); // 保存的路径，备注：需要自己创建
       });
-    }else{
+    } else {
       cb(null, savePath); // 保存的路径，备注：需要自己创建
     }
   },
@@ -30,8 +30,11 @@ var upload = multer({
 })
 
 //上传源码 并将源码存放路径和开始扫描日期更新到保存到tb_sca_record表
-router.post('/src/:language', upload.single('file'), function (req, res, next) {
+router.post('/srcupload/:language', upload.single('file'), function (req, res, next) {
+  console.log('---------------上传源码或者代码分析报告---------------------');
+  let taskparas = [];
   //console.log(req);
+  console.log(`req.params.language: ${req.params.language}`);
   console.log(req.body);
   console.log(req.file);
   //获取当前时间
@@ -43,10 +46,36 @@ router.post('/src/:language', upload.single('file'), function (req, res, next) {
   mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
     if (status) {
       res.send({ "status": "true", "msg": "上传源码成功,即将开始扫描，扫描完成后再点击下载按钮" });
-      console.log('------------解压缩--------------');
-      custom.uncompress(req.file.path);
+      console.log('------------解压缩并开始扫描--------------');
+      custom.callScript(req.body.SystemName, req.file.path, req.params.language);
     }
   });
+
+  /*   let taskparam1 = {
+      "desc": "上传源码后将源码存放路径和开始扫描日期更新到保存到tb_sca_record表",
+      "sql": "update tb_sca_record set scan_start_time = ?, scan_src = ?, scan_src_name = ?  where system_name = ?",
+      "sql_params": [currTime, req.file.path, req.file.originalname, req.body.SystemName],
+      "msg_err": { "status": false, "msg": "更新源码存放路径和开始扫描日期失败" },
+      "msg_success": { "status": true, "msg": "更新源码存放路径和开始扫描日期成功" }
+    };
+  
+    let username = [];
+    let taskparam2 = {
+      "desc": "上传代码后发送给【系统维护联系人/代码检测人员/安全架构师】的消息",
+      "sql": "insert into tb_mmsc(username, msg, status, time) select maintenance, code_checker, architect from tb_sca_system where where system_name = ?",
+      "sql_params": [],
+      "msg_err": { "status": false, "msg": "消息存入数据库失败" },
+      "msg_success": { "status": true, "msg": "消息存入数据库成功" }
+    };
+    taskparas.push(taskparam1);
+    taskparas.push(taskparam2);
+    transactionDao(taskparas, function (status) {
+      if (status) {
+        res.send({ "status": true, "msg": "上传源码成功,即将开始扫描，扫描完成后再点击下载按钮" });
+        console.log('------------解压缩--------------');
+        custom.uncompress(req.file.path);
+      }
+    }); */
 });
 
 //上传excel格式分析报告
@@ -69,7 +98,7 @@ router.post('/analysisReport/:language', upload.single('file'), function (req, r
 //获取初始页面数据
 router.post('/table/:language', function (req, res, next) {
   console.log(req.body);
-  mysqldao.select_Scan_Data(req.body, req.params.language,function (rows) {
+  mysqldao.select_Scan_Data(req.body, req.params.language, function (rows) {
     res.send(rows);
   });
 });
@@ -83,26 +112,26 @@ router.post('/:delty/delete', function (req, res, next) {
     let SystemName = filePath.split('\\')[2];
     let update_sql = '';
     console.log(req.params.delty);
-    if (req.params.delty == 'src'){
+    if (req.params.delty == 'src') {
       update_sql = "update tb_sca_record set  scan_src = '', scan_src_name = ''  where system_name = ?";
       let fileDir = path.join(filePath, "../");
       custom.removeDir(fileDir).then(function () {
         console.log(`删除${fileDir}成功`);
       });
     }
-    if (req.params.delty == 'analysis'){
+    if (req.params.delty == 'analysis') {
       update_sql = "update tb_sca_record set  analysis_report = '', analysis_report_name = ''  where system_name = ?";
       custom.deleteFile(filePath, function (delRes) {
-          console.log(delRes.msg);
+        console.log(delRes.msg);
       });
     }
-      
+
     var update_sql_params = [SystemName];
     console.log(update_sql);
     mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
       if (status) {
         res.send({ "status": true, "msg": `存在该文件，已被删除` });
-      }else{
+      } else {
         res.send({ "status": false, "msg": `删除失败，没找到该文件。可尝试新刷新页面。` });
       }
     });

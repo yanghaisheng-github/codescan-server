@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReportDefinition type="pdf">
+    <TemplateName>cib_low_whitelist</TemplateName>
+    <TemplatePath>C:\Users\Administrator\AppData\Local\Fortify\config\AWB-3.80\reports\cib_low_whitelist.xml</TemplatePath>
+    <LogoPath>/fortify.jpg</LogoPath>
+    <Footnote>Copyright 2013 Fortify Software Inc.</Footnote>
+    <UserName>Administrator</UserName>
+    <ReportSection optionalSubsections="false" enabled="true">
+        <Title>Executive Summary</Title>
+        <SubSection enabled="true">
+            <Title>Issues Overview</Title>
+            <Description>This section provides an overview of the issues uncovered during analysis. The report covers a summary of vulnerability categories discovered by the tool. The auditor should augment this section with higher-level conclusions derived from human review of the application (including architecture reviews,	black-box testing, compliance issues, etc.)</Description>
+            <Text>On $SCAN_DATE$, a source code review was performed over the $PROJECT_NAME$ code base. $SCAN_SUMMARY$ were scanned and reviewed for defects that could lead to potential security vulnerabilities. A total of $TOTAL_FINDINGS$ reviewed findings were uncovered during the analysis.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Issue Summary by Fortify Priority Order</Title>
+            <Description>A table summarizing the number of issues found and the breakdown of issues in each Fortify Priority Level</Description>
+            <IssueListing limit="-1" listing="false">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource</Refinement>
+                <Chart chartType="table">
+                    <Axis>Fortify Priority Order</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Recommendations and Conclusions</Title>
+            <Description>This section gives some high-level recommendations on remediating the issues discussed in the Issues Summary sub section. Recommendations will vary based on deployment scenarios, risk appetite, and existing mitigating strategies. The auditor should supplement the Fortify generic recommendations with specific information that takes into account the application specific variables.</Description>
+            <Text>The Issues Category section provides Fortify recommendations for addressing issues at a generic level.  The recommendations for specific fixes can be extrapolated from those generic recommendations by the development group.</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="true" enabled="true">
+        <Title>Project Summary</Title>
+        <SubSection enabled="true">
+            <Title>Code Base Summary</Title>
+            <Description>Summary of the Codebase that was analyzed</Description>
+            <Text>Code location: $SOURCE_BASE_PATH$&#xD;
+Number of Files: $NUMBER_OF_FILES$&#xD;
+Lines of Code: $LOC$&#xD;
+Build Label: $PROJECT_BUILD_LABEL$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Scan Information</Title>
+            <Description>Details of the analysis</Description>
+            <Text>Scan time: $SCAN_TIME$&#xD;
+SCA Engine version: $FORTIFY_SCA_VERSION$&#xD;
+Machine Name: $SCAN_COMPUTER_ID$&#xD;
+Username running scan: $SCAN_USER$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Results Certification</Title>
+            <Description>A full summary of the Results Certification for this project</Description>
+            <Text>$RESULTS_CERTIFICATION_SUMMARY$&#xD;
+&#xD;
+Details:&#xD;
+&#xD;
+$RESULTS_CERTIFICATION$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Attack Surface</Title>
+            <Description>A full summary of the attack surface for this project</Description>
+            <Text>Attack Surface:&#xD;
+$ATTACK_SURFACE$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Filter Set Summary</Title>
+            <Description>A brief summary of the filterset used to create this report</Description>
+            <Text>Current Enabled Filter Set:&#xD;
+$FILTERSET_NAME$&#xD;
+&#xD;
+Filter Set Details:&#xD;
+&#xD;
+$FILTERSET_DETAILS$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Audit Guide Summary</Title>
+            <Description>Summary of the impact of the audit guide</Description>
+            <Text>$AUDIT_GUIDE_SUMMARY$</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="false" enabled="true">
+        <Title>Issue Count by Category in Critical Fortify Priority</Title>
+        <SubSection enabled="true">
+            <Title>Issue Count by Category in Critical Fortify Priority</Title>
+            <IssueListing limit="-1" listing="false">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource AND [fortify priority order]:critical</Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="false" enabled="true">
+        <Title>Issue Count by Category in High Fortify Priority</Title>
+        <SubSection enabled="true">
+            <Title>Issue Count by Category in High Fortify Priority</Title>
+            <IssueListing limit="-1" listing="false">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource AND [fortify priority order]:high</Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="false" enabled="true">
+        <Title>Issue Count by Category in Medium Fortify Priority</Title>
+        <SubSection enabled="true">
+            <Title>Issue Count by Category in Medium Fortify Priority</Title>
+            <IssueListing limit="-1" listing="false">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource AND [fortify priority order]:medium</Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="false" enabled="true">
+        <Title>Issue Count by Category in Low Fortify Priority</Title>
+        <SubSection enabled="true">
+            <Title>Issue Count by Category in Low Fortify Priority</Title>
+            <IssueListing limit="-1" listing="false">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource AND [fortify priority order]:low</Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="true" enabled="true">
+        <Title>Results Outline</Title>
+        <SubSection enabled="true">
+            <Title>Overall number of results</Title>
+            <Description>Results count</Description>
+            <Text>The scan found $TOTAL_FINDINGS$ issues.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Vulnerability Examples by Category</Title>
+            <Description>Results summary for all priority issues.  Vulnerability examples are provided by category.</Description>
+            <IssueListing limit="-1" listing="true">
+                <Refinement>category:uninitialized variable OR category:format string\: argument number mismatch OR category:format string\: argument type mismatch OR category:unreleased resource</Refinement>
+                <Chart chartType="list">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection optionalSubsections="true" enabled="false">
+        <Title>Detailed Project Summary</Title>
+        <SubSection enabled="true">
+            <Title>Files Scanned</Title>
+            <Description>A detailed listing of all scanned files.  Files are listed with paths relative to the Source Base Path</Description>
+            <Text>Code base location: $SOURCE_BASE_PATH$&#xD;
+Files Scanned:&#xD;
+$FILE_LISTING$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Reference Elements</Title>
+            <Description>A Listing of all libraries used for the translation phase of the analysis</Description>
+            <Text>Classpath:&#xD;
+&#xD;
+$CLASSPATH_LISTING$&#xD;
+&#xD;
+Libdirs:&#xD;
+&#xD;
+$LIBDIR_LISTING$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Rulepacks</Title>
+            <Description>A listing of all rulepacks used in the analysis</Description>
+            <Text>$RULEPACKS$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Properties</Title>
+            <Description>A complete listing of all properties set during analysis phase</Description>
+            <Text>$PROPERTIES$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Commandline Arguments</Title>
+            <Description>A listing of all arguments passed to SCA during the analysis phase</Description>
+            <Text>$COMMANDLINE_ARGS$</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Warnings</Title>
+            <Description>A listing of all warnings that occurred during the scan, during both translation and analysis phase</Description>
+            <Text>$WARNINGS$</Text>
+        </SubSection>
+    </ReportSection>
+</ReportDefinition>

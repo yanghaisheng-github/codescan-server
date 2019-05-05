@@ -1,7 +1,8 @@
 const path = require('path');
 const fs = require('fs');
-var exec = require('child_process').exec;
+const { exec, execFile } = require('child_process');
 const iconv = require('iconv-lite');
+const mmscdao = require('./mmscdao');
 
 /**
  * 扩展Date的Format函数
@@ -83,19 +84,55 @@ function deleteFile(fileUrl, callback) {
 //使用7-zip解压缩，所以电脑上需要安装7-zip，并配置环境变量
 //相关命令参考https://www.jianshu.com/p/4f9be6b47161
 //指定目录-o${scanDir} 无空格
-function uncompress(compressedFile) {
+function callScript(systemname, compressedFile, languange) {
+    //压缩文件绝对路径
     var compressedAbsFile = path.join(__dirname, '../', compressedFile);
+    //扫描目录
     var scanDir = path.join(compressedAbsFile, "../");
-    var cmdStr = `7z x ${compressedAbsFile} -o${scanDir} -y`;
-    console.log(cmdStr);
-    exec(cmdStr, { encoding: 'binary' }, function (err, stdout, stderr) {
+    //扫描结果保存目录
+    var outputDir = path.join(__dirname, '../downloads/', systemname);
+    //自定义扫描模板cib_low_whitelist等的路径
+    var moderDir = path.join(__dirname, "../config/");
+    /*     var cmdStr = `7z x ${compressedAbsFile} -o${scanDir} -y`;
+        console.log(cmdStr);
+        exec(cmdStr, { encoding: 'binary' }, function (err, stdout, stderr) {
+            if (err) {
+                stderr = iconv.decode(stderr, 'gbk');
+                console.log(`解压出错：${stderr}`);
+            } else {
+                stdout = iconv.decode(stdout, 'gbk');
+                console.log(`解压成功：${stdout}`);
+                //开始扫描
+            }
+        }); */
+    let batScript = "scanJava.bat";
+    if (languange == "JS") {
+        batScript = "scanJS.bat";
+    } else if (languange == "C") {
+        batScript = "scanC.bat"
+    }
+
+    let batScriptPath = path.join(__dirname, batScript);
+
+    execFile(batScriptPath, [systemname, compressedAbsFile, scanDir, outputDir, moderDir], function (err, stdout, stderr) {
         if (err) {
-            stderr = iconv.decode(stderr, 'gbk');
-            console.log(`解压出错：${stderr}`);
+            console.log(err);
+            return;
         } else {
-            stdout = iconv.decode(stdout, 'gbk');
-            console.log(`解压成功：${stdout}`);
-            //开始扫描
+            // 将扫描结果路径和时间更新到数据库中
+            var currTime = (new Date()).Format("yyyy-MM-dd hh:mm:ss");
+            var updatesql = "update tb_sca_record set scan_end_time = ? , scan_report = ? where system_name = ?";
+            var updatesql_params = [currTime, `${outputDir}\\${systemname}.pdf`, systemname];
+            console.log("===================");
+            console.log(currTime);
+            console.log(updatesql);
+            console.log(updatesql_params);
+            mmscdao.simpleDao(updatesql, updatesql_params, function(rows){
+                if(rows.affectedRows == 1){
+                    console.log("已经成功将扫描结果路径和时间更新到数据库中");
+                }
+            });
+            //console.log(`stdout: ${stdout}`);
         }
     });
 }
@@ -105,5 +142,5 @@ module.exports = {
     mkdirSync,
     removeDir,
     deleteFile,
-    uncompress,
+    callScript,
 }

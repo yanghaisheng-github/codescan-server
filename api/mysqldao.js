@@ -41,12 +41,12 @@ module.exports = {
                 if (err) throw err;
                 if (rows[0] != undefined) {
                     if (rows[0].password == password) {
-                        callback({'status': true, 'role': rows[0].authority});
+                        callback({ 'status': true, 'role': rows[0].authority });
                     } else {
-                        callback({'status': false});
+                        callback({ 'status': false });
                     }
                 } else {
-                    callback({'status': false});
+                    callback({ 'status': false });
                 }
             });
             conn.release();
@@ -247,91 +247,91 @@ module.exports = {
 
     //通过事务判断数据是否已存在，然后添加数据到系统清单表tb_sca_system，并返回操作时间
     //再次添加维护联系人，代码检测人员、安全架构师用户
-/*     addSystemData: function (data, returnRes) {
-        //获取当前时间
-        var currTime = custom.getCurrentTime();
-        console.log(currTime);
-
-        var select_sql = "select system_name from tb_sca_system where system_name = ?";
-        var select_sql_params = [data.SystemName];
-
-        var add_tb_sca_system_sql = "insert into tb_sca_system(system_name, department, security_level, maintenance, code_checker, architect, language, edit_time, remark)"
-            + " values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        var add_tb_sca_system_sql_params = [data.SystemName, data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark];
-
-        console.log("-------开始执行事务--------")
-        connPool.getConnection(function (err, conn) {
-            conn.beginTransaction(function (err) {
-                if (err) throw err;
-            });
-            var task1 = function (callback) {
-                console.log('=========开始执行task1==========');
-                conn.query(select_sql, select_sql_params, function (errI, rows) {
-                    console.log(rows);
-                    if (errI) returnRes({ "status": "false", "msg": "数据库判断该系统名称是否已存在时发生异常" });
-                    if (rows.length != 0) {
-                        returnRes({ "status": "false", "msg": "数据库已存在相同系统名称" });
-                        conn.release();
+    /*     addSystemData: function (data, returnRes) {
+            //获取当前时间
+            var currTime = custom.getCurrentTime();
+            console.log(currTime);
+    
+            var select_sql = "select system_name from tb_sca_system where system_name = ?";
+            var select_sql_params = [data.SystemName];
+    
+            var add_tb_sca_system_sql = "insert into tb_sca_system(system_name, department, security_level, maintenance, code_checker, architect, language, edit_time, remark)"
+                + " values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            var add_tb_sca_system_sql_params = [data.SystemName, data.Department, data.SecurityLevel, data.Maintenance, data.CodeChecker, data.Architect, data.Language, currTime, data.Remark];
+    
+            console.log("-------开始执行事务--------")
+            connPool.getConnection(function (err, conn) {
+                conn.beginTransaction(function (err) {
+                    if (err) throw err;
+                });
+                var task1 = function (callback) {
+                    console.log('=========开始执行task1==========');
+                    conn.query(select_sql, select_sql_params, function (errI, rows) {
+                        console.log(rows);
+                        if (errI) returnRes({ "status": "false", "msg": "数据库判断该系统名称是否已存在时发生异常" });
+                        if (rows.length != 0) {
+                            returnRes({ "status": "false", "msg": "数据库已存在相同系统名称" });
+                            conn.release();
+                            return;
+                        }
+                        console.log("----task1执行结果----")
+                        callback(null, rows);
+                    });
+                };
+    
+                var task2 = function (callback) {
+                    console.log('=========开始执行task2==========');
+                    conn.query(add_tb_sca_system_sql, add_tb_sca_system_sql_params, function (errI, rows) {
+                        if (errI) returnRes({ "status": "false", "msg": "数据库插入该系统名称时发生异常" });
+                        //console.log(rows);
+                        returnRes({ "status": "success", "msg": currTime });
+                        console.log("----task2执行结果----")
+                        callback(null, rows);
+                    });
+                };
+    
+                var task3 = function (callback) {
+                    console.log('=========开始执行task3==========');
+                    conn.query(add_tb_mmsc_Maintenance_sql, add_tb_mmsc_sql_Maintenance_params, function (errI, rows) {
+                        if (errI) returnRes({ "status": "false", "msg": "数据库给Maintenance插入mmsc表时发生异常" });
+                        //console.log(rows);
+                        returnRes({ "status": "success", "msg": currTime });
+                        console.log("----task3执行结果----")
+                        callback(null, rows);
+                    });
+                };
+                var task4 = function (callback) {
+                    console.log('=========开始执行task4==========');
+                    conn.query(add_tb_mmsc_CodeChecker_sql, add_tb_mmsc_sql_CodeChecker_params, function (errI, rows) {
+                        if (errI) returnRes({ "status": "false", "msg": "数据库给CodeChecker插入mmsc表时发生异常" });
+                        //console.log(rows);
+                        returnRes({ "status": "success", "msg": currTime });
+                        console.log("----task4执行结果----")
+                        callback(null, rows);
+                    });
+                };
+                
+                async.series([task1, task2, task3, task4], function (err, result) {
+                    if (err) {
+                        console.log(err);
+                        //回滚
+                        connection.rollback(function () {
+                            console.log('出现错误,回滚!');
+                            //释放资源
+                            connection.release();
+                        });
                         return;
                     }
-                    console.log("----task1执行结果----")
-                    callback(null, rows);
-                });
-            };
-
-            var task2 = function (callback) {
-                console.log('=========开始执行task2==========');
-                conn.query(add_tb_sca_system_sql, add_tb_sca_system_sql_params, function (errI, rows) {
-                    if (errI) returnRes({ "status": "false", "msg": "数据库插入该系统名称时发生异常" });
-                    //console.log(rows);
-                    returnRes({ "status": "success", "msg": currTime });
-                    console.log("----task2执行结果----")
-                    callback(null, rows);
-                });
-            };
-
-            var task3 = function (callback) {
-                console.log('=========开始执行task3==========');
-                conn.query(add_tb_mmsc_Maintenance_sql, add_tb_mmsc_sql_Maintenance_params, function (errI, rows) {
-                    if (errI) returnRes({ "status": "false", "msg": "数据库给Maintenance插入mmsc表时发生异常" });
-                    //console.log(rows);
-                    returnRes({ "status": "success", "msg": currTime });
-                    console.log("----task3执行结果----")
-                    callback(null, rows);
-                });
-            };
-            var task4 = function (callback) {
-                console.log('=========开始执行task4==========');
-                conn.query(add_tb_mmsc_CodeChecker_sql, add_tb_mmsc_sql_CodeChecker_params, function (errI, rows) {
-                    if (errI) returnRes({ "status": "false", "msg": "数据库给CodeChecker插入mmsc表时发生异常" });
-                    //console.log(rows);
-                    returnRes({ "status": "success", "msg": currTime });
-                    console.log("----task4执行结果----")
-                    callback(null, rows);
-                });
-            };
-            
-            async.series([task1, task2, task3, task4], function (err, result) {
-                if (err) {
-                    console.log(err);
-                    //回滚
-                    connection.rollback(function () {
-                        console.log('出现错误,回滚!');
-                        //释放资源
-                        connection.release();
+                    //提交
+                    conn.commit(function (err) {
+                        if (err) throw err;
+                        console.log(result);
+                        conn.release();
                     });
-                    return;
-                }
-                //提交
-                conn.commit(function (err) {
-                    if (err) throw err;
-                    console.log(result);
-                    conn.release();
+    
                 });
-
             });
-        });
-    }, */
+        }, */
 
     //通过事务判断系统名称数据是否已存在，然后添加数据到系统清单表tb_sca_system，并返回操作时间
     //然后再添加到表tb_sca_record
@@ -365,12 +365,13 @@ module.exports = {
                 console.log('=========开始执行task1==========');
                 conn.query(select_sql, select_sql_params, function (errI, rows) {
                     if (errI) returnRes({ "status": "false", "msg": "数据库判断该系统名称是否已存在时发生异常" });
+                    console.log("----task1执行结果----");
+                    console.log(rows);
                     if (rows.length != 0) {
                         returnRes({ "status": "false", "msg": "数据库已存在相同系统名称" });
                         conn.release();
                         return;
                     }
-                    console.log("----task1执行结果----" + rows);
                     callback(null, rows);
                 });
             };
@@ -483,16 +484,16 @@ module.exports = {
     },
 
     //代码扫描页面初始化,根据用户名和语言显示对应的数据
-    select_Scan_Data: function (data, language,callback) {
+    select_Scan_Data: function (data, language, callback) {
         console.log("username:" + data.username);
         console.log(`role: ${data.role}`);
         //判断用户是否为管理员，若是管理员，则根据语言显示所有数据
         var sql = '';
         var sql_params = '';
-        if(data.role == '管理员'){
+        if (data.role == '管理员') {
             sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where language = ?)";
             sql_params = [language];
-        }else{
+        } else {
             sql = "select system_name as SystemName, scan_src, scan_src_name, scan_report_first, scan_report, scan_report_name, analysis_report_first, analysis_report, analysis_report_name from tb_sca_record where system_name in (select system_name from tb_sca_system where (maintenance = ?  or code_checker = ? or architect = ?) and language = ?)";
             sql_params = [data.username, data.username, data.username, language];
         }
@@ -515,6 +516,51 @@ module.exports = {
                 returnRes(true);;
             });
             conn.release();
+        });
+    },
+
+    //mysql事务封装，传入[task1, task2, ...]
+    transactionDao: function (taskparas, returnRes) {
+        console.log("-------开始执行事务--------");
+        let tasks = [];
+        connPool.getConnection(function (err, conn) {
+            conn.beginTransaction(function (err) {
+                if (err) throw err;
+            });
+
+            taskparas.forEach(function (v) {
+                var task = function (callback) {
+                    console.log(`============${v.desc}=======开始执行=======`);
+                    conn.query(v.sql, v.sql_params, function (errI, rows) {
+                        if (errI) returnRes({ "status": false, "msg": v.msg_err });
+                        //console.log(rows);
+                        console.log(`============${v.desc}========执行成功======`);
+                        callback(null, rows);
+                    });
+                };
+                tasks.push(task);
+            });
+
+            async.series(tasks, function (err, result) {
+                if (err) {
+                    console.log(err);
+                    //回滚
+                    connection.rollback(function () {
+                        console.log('出现错误,回滚!');
+                        //释放资源
+                        connection.release();
+                    });
+                    return;
+                }
+                //提交
+                conn.commit(function (err) {
+                    if (err) throw err;
+                    console.log(result);
+                    returnRes(true);
+                    conn.release();
+                });
+
+            });
         });
     },
 

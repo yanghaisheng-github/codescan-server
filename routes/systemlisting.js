@@ -28,6 +28,14 @@ router.post('/add', function (req, res, next) {
     });
   } */
 
+  // 创建扫描结果下载目录
+  var scanResultPath = `downloads/${req.body.SystemName}`;
+  if (!fs.existsSync(scanResultPath)) {
+    custom.mkdirSync(scanResultPath, function () {
+      console.log('系统扫描结果目录创建成功')
+    });
+  }
+
   //console.log(req.body);
   mysqldao.addSystemData(req.body, function (addResult) {
     res.send(addResult);
