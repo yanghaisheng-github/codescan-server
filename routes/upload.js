@@ -171,4 +171,22 @@ router.post('/download', function (req, res, next) {
 
 });
 
+router.post('/downloadReport', function (req, res, next) {
+  console.log('==============下载报告=====================');
+  console.log(req.body.systemname);
+  let download_url = path.join(__dirname, '../downloads/', req.body.systemname, `/${req.body.systemname}.pdf`);
+  console.log(`download_url: ${download_url}`)
+
+  res.download(download_url, function (err) {
+    if (err) {
+      console.log(err);
+      console.log(`服务器发送失败`);
+      //由于responseType: "arraybuffer"的作用导致返回的数据都是buffer类型，不是json，所以客户端无法通过res.data.*去获取对应的返回数据
+      //res.send({ "status": false, "msg": `服务器发送失败` });
+    } else {
+      console.log('发送成功');
+    }
+  });
+});
+
 module.exports = router;
