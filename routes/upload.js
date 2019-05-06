@@ -40,10 +40,24 @@ router.post('/srcupload/:language', upload.single('file'), function (req, res, n
   //获取当前时间
   var currTime = custom.getCurrentTime();
   console.log(currTime);
-  var update_sql = "update tb_sca_record set scan_start_time = ?, scan_src = ?, scan_src_name = ?  where system_name = ?";
-  var update_sql_params = [currTime, req.file.path, req.file.originalname, req.body.SystemName];
+  /*   var update_sql = "update tb_sca_record set scan_start_time = ?, scan_src = ?, scan_src_name = ?  where system_name = ?";
+    var update_sql_params = [currTime, req.file.path, req.file.originalname, req.body.SystemName];
+  
+    mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
+      if (status) {
+        res.send({ "status": "true", "msg": "上传源码成功,即将开始扫描，扫描完成后再点击下载按钮" });
+        console.log('------------解压缩并开始扫描--------------');
+        custom.callScript(req.body.SystemName, req.file.path, req.params.language);
+      }
+    }); */
 
-  mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
+  let maintenance_msg = `"${req.body.SystemName}"已经成功上传源码，扫描成功后请及时下载扫描报告，并上传代码分析报告`;
+  let code_checker_msg = `"${req.body.SystemName}"已经成功上传源码，扫描成功后请及时下载扫描报告，并上传代码分析报告`;
+  let architect_msg = `"${req.body.SystemName}"已经成功上传源码，扫描成功后可查看扫描报告`;
+  let sql_procedurce = `CALL mmsc_upload_file(?, ?, ?, ?, ?, ?, ?, ?)`;
+  let sql_procedurce_params = [req.body.SystemName, 'src', req.file.path, req.file.originalname,
+    maintenance_msg, code_checker_msg, architect_msg, currTime];
+  mysqldao.call_procudure(sql_procedurce, sql_procedurce_params, function (status) {
     if (status) {
       res.send({ "status": "true", "msg": "上传源码成功,即将开始扫描，扫描完成后再点击下载按钮" });
       console.log('------------解压缩并开始扫描--------------');
@@ -51,31 +65,6 @@ router.post('/srcupload/:language', upload.single('file'), function (req, res, n
     }
   });
 
-  /*   let taskparam1 = {
-      "desc": "上传源码后将源码存放路径和开始扫描日期更新到保存到tb_sca_record表",
-      "sql": "update tb_sca_record set scan_start_time = ?, scan_src = ?, scan_src_name = ?  where system_name = ?",
-      "sql_params": [currTime, req.file.path, req.file.originalname, req.body.SystemName],
-      "msg_err": { "status": false, "msg": "更新源码存放路径和开始扫描日期失败" },
-      "msg_success": { "status": true, "msg": "更新源码存放路径和开始扫描日期成功" }
-    };
-  
-    let username = [];
-    let taskparam2 = {
-      "desc": "上传代码后发送给【系统维护联系人/代码检测人员/安全架构师】的消息",
-      "sql": "insert into tb_mmsc(username, msg, status, time) select maintenance, code_checker, architect from tb_sca_system where where system_name = ?",
-      "sql_params": [],
-      "msg_err": { "status": false, "msg": "消息存入数据库失败" },
-      "msg_success": { "status": true, "msg": "消息存入数据库成功" }
-    };
-    taskparas.push(taskparam1);
-    taskparas.push(taskparam2);
-    transactionDao(taskparas, function (status) {
-      if (status) {
-        res.send({ "status": true, "msg": "上传源码成功,即将开始扫描，扫描完成后再点击下载按钮" });
-        console.log('------------解压缩--------------');
-        custom.uncompress(req.file.path);
-      }
-    }); */
 });
 
 //上传excel格式分析报告
@@ -86,13 +75,26 @@ router.post('/analysisReport/:language', upload.single('file'), function (req, r
   var currTime = custom.getCurrentTime();
   console.log(currTime);
 
-  var update_sql = "update tb_sca_record set analysis_time = ?, analysis_report = ?, analysis_report_name = ? where system_name = ?";
-  var update_sql_params = [currTime, req.file.path, req.file.originalname, req.body.SystemName];
-  mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
+  /*   var update_sql = "update tb_sca_record set analysis_time = ?, analysis_report = ?, analysis_report_name = ? where system_name = ?";
+    var update_sql_params = [currTime, req.file.path, req.file.originalname, req.body.SystemName];
+    mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
+      if (status) {
+        res.send({ "status": "true", "msg": "上传分析报告成功" });
+      }
+    }); */
+
+  let maintenance_msg = `"${req.body.SystemName}"已经成功上传分析报告`;
+  let code_checker_msg = `"${req.body.SystemName}"已经成功上传分析报告`;
+  let architect_msg = `"${req.body.SystemName}"已经成功上传分析报告，请及时审核`;
+  let sql_procedurce = `CALL mmsc_upload_file(?, ?, ?, ?, ?, ?, ?, ?)`;
+  let sql_procedurce_params = [req.body.SystemName, 'analysisReport', req.file.path, req.file.originalname,
+    maintenance_msg, code_checker_msg, architect_msg, currTime];
+  mysqldao.call_procudure(sql_procedurce, sql_procedurce_params, function (status) {
     if (status) {
       res.send({ "status": "true", "msg": "上传分析报告成功" });
     }
   });
+
 });
 
 //获取初始页面数据

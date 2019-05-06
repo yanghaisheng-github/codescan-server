@@ -121,15 +121,29 @@ function callScript(systemname, compressedFile, languange) {
         } else {
             // 将扫描结果路径和时间更新到数据库中
             var currTime = (new Date()).Format("yyyy-MM-dd hh:mm:ss");
-            var updatesql = "update tb_sca_record set scan_end_time = ? , scan_report = ? where system_name = ?";
-            var updatesql_params = [currTime, `${outputDir}\\${systemname}.pdf`, systemname];
-            console.log("===================");
-            console.log(currTime);
-            console.log(updatesql);
-            console.log(updatesql_params);
-            mmscdao.simpleDao(updatesql, updatesql_params, function(rows){
-                if(rows.affectedRows == 1){
-                    console.log("已经成功将扫描结果路径和时间更新到数据库中");
+            /*             var updatesql = "update tb_sca_record set scan_end_time = ? , scan_report = ? where system_name = ?";
+                        var updatesql_params = [currTime, `${outputDir}\\${systemname}.pdf`, systemname];
+                        console.log("===================");
+                        console.log(currTime);
+                        console.log(updatesql);
+                        console.log(updatesql_params);
+                        mmscdao.simpleDao(updatesql, updatesql_params, function(rows){
+                            if(rows.affectedRows == 1){
+                                console.log("已经成功将扫描结果路径和时间更新到数据库中");
+                            }
+                        }); */
+
+            let maintenance_msg = `"${systemname}"已完成扫描，请及时下载扫描报告，并上传代码分析报告`;
+            let code_checker_msg = `"${systemname}"已完成扫描，请及时下载扫描报告，并上传代码分析报告`;
+            let architect_msg = `"${systemname}"已完成扫描，可查看扫描报告`;
+            let sql_procedurce = `CALL mmsc_upload_file(?, ?, ?, ?, ?, ?, ?, ?)`;
+            let filePath = path.join(outputDir, `${systemname}.pdf`);
+            let sql_procedurce_params = [systemname, 'scanFinsh', filePath, `${systemname}.pdf`,
+                maintenance_msg, code_checker_msg, architect_msg, currTime];
+            console.log(`========${outputDir}\\${systemname}.pdf==========`);
+            mmscdao.call_procudure(sql_procedurce, sql_procedurce_params, function (status) {
+                if (status) {
+                    console.log(`"${systemname}"已完成扫描`);
                 }
             });
             //console.log(`stdout: ${stdout}`);

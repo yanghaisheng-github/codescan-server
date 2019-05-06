@@ -518,6 +518,7 @@ module.exports = {
             conn.release();
         });
     },
+    
 
     //mysql事务封装，传入[task1, task2, ...]
     transactionDao: function (taskparas, returnRes) {
@@ -561,6 +562,18 @@ module.exports = {
                 });
 
             });
+        });
+    },
+
+    // 调用mysql存储过程
+    call_procudure: function (sql_procedurce, sql_procedurce_params, returnRes) {
+        connPool.getConnection(function (err, conn) {
+            conn.query(sql_procedurce, sql_procedurce_params, function (err, rows) {
+                if (err) throw err;
+                console.log(rows);
+                returnRes(true);;
+            });
+            conn.release();
         });
     },
 

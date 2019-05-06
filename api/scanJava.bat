@@ -19,6 +19,6 @@ echo %scanDir%
 7z x %compressedAbsFile% -o%scanDir% -y
 
 sourceanalyzer -b %systemName% -clean
-sourceanalyzer -b %systemName% %scanDir% -exclude %compressedAbsFile%
+sourceanalyzer -b %systemName% %scanDir% -cp *.jar .
 sourceanalyzer -b %systemName% -scan -logfile %scanDir%/%systemName%_scan_log.txt -f %outputDir%/%systemName%.fpr
 ReportGenerator -format pdf -f  %outputDir%/%systemName%.pdf -source %outputDir%/%systemName%.fpr -template %modelDir%/cib_low_whitelist.xml
