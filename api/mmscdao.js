@@ -1,6 +1,5 @@
 var mysql = require('mysql');
 var db = require('../config/db.config');
-var async = require('async');
 
 var connPool = mysql.createPool(db.mysql);
 module.exports = {

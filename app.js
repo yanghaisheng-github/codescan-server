@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 var systemlistingRouter = require('./routes/systemlisting');
 var uploadRouter = require('./routes/upload');
 var mmscRouter = require('./routes/mmsc');
+var headerRouter = require('./routes/header');
 
 var app = express();
 
@@ -33,6 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 app.use('/', indexRouter);
+app.use('/header', headerRouter);
 app.use('/user/login', usersRouter);
 app.use('/systemlisting/table', systemlistingRouter);
 app.use('/users/table', usersRouter);
