@@ -4,6 +4,7 @@ node_modules
 /uploads
 /downloads
 /rtf
+/logs
 
 # local env files
 .env.local

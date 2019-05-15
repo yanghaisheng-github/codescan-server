@@ -3,8 +3,7 @@ var router = express.Router();
 var mysqldao = require('../api/mysqldao');
 const fs = require('fs');
 const custom = require('../api/custom');
-
-
+var logger = require('log4js').getLogger("systemlisting");
 
 //添加数据到系统清单表tb_sca_system
 router.post('/add', function (req, res, next) {
@@ -44,6 +43,10 @@ router.post('/add', function (req, res, next) {
 
 //更新数据到系统清单表tb_sca_system
 router.post('/edit', function (req, res, next) {
+/*   logger.info("this is info");
+  logger.warn("this is warn");
+  logger.debug("this is debug");
+  logger.error("this is error"); */
   //console.log(req.body);
   mysqldao.updateSystemData(req.body, function (insertResult) {
     res.send(insertResult);
@@ -66,7 +69,7 @@ router.post('/delete', function (req, res, next) {
     let dirSysName = `uploads/${element.Language}/${element.SystemName}`;
     if (fs.existsSync(dirSysName)) {
       custom.removeDir(dirSysName).then(function () {
-        console.log(`删除uploads/${element.Language}/${element.SystemName}成功`);
+        logger.info(`删除uploads/${element.Language}/${element.SystemName}成功`);
       })
     }
   });
