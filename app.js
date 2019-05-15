@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
@@ -10,6 +11,7 @@ var systemlistingRouter = require('./routes/systemlisting');
 var uploadRouter = require('./routes/upload');
 var mmscRouter = require('./routes/mmsc');
 var headerRouter = require('./routes/header');
+var tabAnalysisReportRouter = require('./routes/tabAnalysisReport');
 
 var app = express();
 
@@ -27,17 +29,25 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'RTF')));
 
 app.use('/', indexRouter);
 app.use('/header', headerRouter);
 app.use('/user/login', usersRouter);
 app.use('/systemlisting/table', systemlistingRouter);
 app.use('/users/table', usersRouter);
+app.use('/tabAnalysisReport', tabAnalysisReportRouter);
 
 app.use('/upload', uploadRouter);
 app.use('/mmsc', mmscRouter);

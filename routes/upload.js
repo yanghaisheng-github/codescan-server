@@ -67,22 +67,13 @@ router.post('/srcupload/:language', upload.single('file'), function (req, res, n
 
 });
 
-//上传excel格式分析报告
+/* //上传excel格式分析报告
 router.post('/analysisReport/:language', upload.single('file'), function (req, res, next) {
   console.log(req.body);
   console.log(req.file);
   //获取当前时间
   var currTime = custom.getCurrentTime();
   console.log(currTime);
-
-  /*   var update_sql = "update tb_sca_record set analysis_time = ?, analysis_report = ?, analysis_report_name = ? where system_name = ?";
-    var update_sql_params = [currTime, req.file.path, req.file.originalname, req.body.SystemName];
-    mysqldao.update_tb_sca_record(update_sql, update_sql_params, function (status) {
-      if (status) {
-        res.send({ "status": "true", "msg": "上传分析报告成功" });
-      }
-    }); */
-
   let maintenance_msg = `"${req.body.SystemName}"已经成功上传分析报告`;
   let code_checker_msg = `"${req.body.SystemName}"已经成功上传分析报告`;
   let architect_msg = `"${req.body.SystemName}"已经成功上传分析报告，请及时审核`;
@@ -95,7 +86,7 @@ router.post('/analysisReport/:language', upload.single('file'), function (req, r
     }
   });
 
-});
+}); */
 
 //获取初始页面数据
 router.post('/table/:language', function (req, res, next) {
