@@ -3,6 +3,7 @@ const fs = require('fs');
 const { exec, execFile } = require('child_process');
 const iconv = require('iconv-lite');
 const mmscdao = require('./mmscdao');
+var logger = require('log4js').getLogger("custom");
 
 /**
  * 扩展Date的Format函数
@@ -73,10 +74,10 @@ function removeDir(dir) {
 function deleteFile(fileUrl, callback) {
     if (fs.existsSync(fileUrl)) {
         fs.unlinkSync(fileUrl);
-        console.log(`存在该文件${fileUrl}，已被删除`);
+        logger.info(`存在该文件${fileUrl}，已被删除`);
         callback({ "status": true, "msg": `存在该文件，已被删除` });
     } else {
-        console.log(`没找到该文件${fileUrl}`);
+        logger.info(`没找到该文件${fileUrl}`);
         callback({ "status": false, "msg": `删除失败，没找到该文件。可尝试新刷新页面。` });
     }
 }
@@ -94,14 +95,14 @@ function callScript(systemname, compressedFile, languange) {
     //自定义扫描模板cib_low_whitelist等的路径
     var moderDir = path.join(__dirname, "../config/");
     /*     var cmdStr = `7z x ${compressedAbsFile} -o${scanDir} -y`;
-        console.log(cmdStr);
+       logger.info(cmdStr);
         exec(cmdStr, { encoding: 'binary' }, function (err, stdout, stderr) {
             if (err) {
                 stderr = iconv.decode(stderr, 'gbk');
-                console.log(`解压出错：${stderr}`);
+               logger.info(`解压出错：${stderr}`);
             } else {
                 stdout = iconv.decode(stdout, 'gbk');
-                console.log(`解压成功：${stdout}`);
+               logger.info(`解压成功：${stdout}`);
                 //开始扫描
             }
         }); */
@@ -116,20 +117,20 @@ function callScript(systemname, compressedFile, languange) {
 
     execFile(batScriptPath, [systemname, compressedAbsFile, scanDir, outputDir, moderDir], function (err, stdout, stderr) {
         if (err) {
-            console.log(err);
+            logger.info(err);
             return;
         } else {
             // 将扫描结果路径和时间更新到数据库中
             var currTime = (new Date()).Format("yyyy-MM-dd hh:mm:ss");
             /*             var updatesql = "update tb_sca_record set scan_end_time = ? , scan_report = ? where system_name = ?";
                         var updatesql_params = [currTime, `${outputDir}\\${systemname}.pdf`, systemname];
-                        console.log("===================");
-                        console.log(currTime);
-                        console.log(updatesql);
-                        console.log(updatesql_params);
+                       logger.info("===================");
+                       logger.info(currTime);
+                       logger.info(updatesql);
+                       logger.info(updatesql_params);
                         mmscdao.simpleDao(updatesql, updatesql_params, function(rows){
                             if(rows.affectedRows == 1){
-                                console.log("已经成功将扫描结果路径和时间更新到数据库中");
+                               logger.info("已经成功将扫描结果路径和时间更新到数据库中");
                             }
                         }); */
 
@@ -140,10 +141,10 @@ function callScript(systemname, compressedFile, languange) {
             let filePath = path.join(outputDir, `${systemname}.pdf`);
             let sql_procedurce_params = [systemname, 'scanFinsh', filePath, `${systemname}.pdf`,
                 maintenance_msg, code_checker_msg, architect_msg, currTime];
-            console.log(`========${outputDir}\\${systemname}.pdf==========`);
+            logger.info(`========${outputDir}\\${systemname}.pdf==========`);
             mmscdao.call_procudure(sql_procedurce, sql_procedurce_params, function (status) {
                 if (status) {
-                    console.log(`"${systemname}"已完成扫描`);
+                    logger.info(`"${systemname}"已完成扫描`);
                 }
             });
             //console.log(`stdout: ${stdout}`);
